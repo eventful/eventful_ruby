@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>File: api.rb</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <meta http-equiv="Content-Script-Type" content="text/javascript" />
+  <link rel="stylesheet" href="../../.././rdoc-style.css" type="text/css" media="screen" />
+  <script type="text/javascript">
+  // <![CDATA[
+
+  function popupCode( url ) {
+    window.open(url, "Code", "resizable=yes,scrollbars=yes,toolbar=no,status=no,height=150,width=400")
+  }
+
+  function toggleCode( id ) {
+    if ( document.getElementById )
+      elem = document.getElementById( id );
+    else if ( document.all )
+      elem = eval( "document.all." + id );
+    else
+      return false;
+
+    elemStyle = elem.style;
+    
+    if ( elemStyle.display != "block" ) {
+      elemStyle.display = "block"
+    } else {
+      elemStyle.display = "none"
+    }
+
+    return true;
+  }
+  
+  // Make codeblocks hidden by default
+  document.writeln( "<style type=\"text/css\">div.method-source-code { display: none }</style>" )
+  
+  // ]]>
+  </script>
+
+</head>
+<body>
+
+
+
+  <div id="fileHeader">
+    <h1>api.rb</h1>
+    <table class="header-table">
+    <tr class="top-aligned-row">
+      <td><strong>Path:</strong></td>
+      <td>lib/eventful/api.rb
+      </td>
+    </tr>
+    <tr class="top-aligned-row">
+      <td><strong>Last Update:</strong></td>
+      <td>Mon Oct 01 15:34:35 -0700 2007</td>
+    </tr>
+    </table>
+  </div>
+  <!-- banner header -->
+
+  <div id="bodyContent">
+
+
+
+  <div id="contextContent">
+
+    <div id="description">
+      <p>
+A library for working with the <a
+href="../../../classes/Eventful.html">Eventful</a> API. Simple programmatic
+access to <a href="../../../classes/Eventful.html">Eventful</a>&#8216;s
+database of events, venues, performers and speakers, groups, calendars, and
+users.
+</p>
+<p>
+See <a href="http://api.eventful.com">api.eventful.com</a> for more
+information about the <a href="../../../classes/Eventful.html">Eventful</a>
+API and the available API methods.
+</p>
+<h2>Example Usage</h2>
+<pre>
+ require 'rubygems'
+ require 'eventful/api'
+
+ begin
+
+   # Start an API session with a username and password
+   eventful = Eventful::API.new 'application_key',
+                                :user =&gt; 'username',
+                                :password =&gt; 'password'
+
+   # Lookup an event by its unique id
+   event = eventful.call 'events/get',
+                         :id =&gt; 'E0-001-001042544-7'
+
+   puts &quot;Event Title: #{event['title']}&quot;
+
+   # Get information about that event's venue
+   venue = eventful.call 'venues/get',
+                         :id =&gt; event['venue_id']
+
+   puts &quot;Venue: #{venue['name']}&quot;
+
+ rescue Eventful::APIError =&gt; e
+   puts &quot;There was a problem with the API call: #{e}&quot;
+ end
+</pre>
+<h2>Another Example</h2>
+<pre>
+ require 'rubygems'
+ require 'eventful/api'
+
+ # First, create our Eventful::API object
+ eventful = Eventful::API.new 'application_key'
+
+ loop do
+   # Ask the user what and where to search
+   puts &quot;Search where? (Ex: San Diego)&quot;
+   print &quot;? &quot;
+   location = gets.chomp
+   puts &quot;Search for what (Ex: music)&quot;
+   print &quot;? &quot;
+   query = gets.chomp
+
+   # This is the cool part!
+   results = eventful.call 'events/search',
+                           :keywords =&gt; query,
+                           :location =&gt; location,
+                           :page_size =&gt; 5
+
+   # If we couldn't find anything, ask the user again
+   if results['events'].nil? then
+     puts
+     puts &quot;Hmm. I couldn't find anything. Sorry.&quot;
+     puts
+     next
+   end
+
+   # Output the results
+   results['events']['event'].each do |event|
+     puts
+     puts &quot;http://eventful.com/events/&quot; + event['id']
+     puts event['title']
+     puts &quot;  at &quot; + event['venue_name']
+     puts &quot;  on &quot; + Time.parse(event['start_time']).strftime(&quot;%a, %b %d, %I:%M %p&quot;) if event['start_time']
+   end
+   puts
+ end
+</pre>
+<h2>API Key</h2>
+<p>
+Use of the <a href="../../../classes/Eventful.html">Eventful</a> API
+requires an application key (see <a
+href="http://api.eventful.com/keys">api.eventful.com/keys</a> for more
+information).
+</p>
+<h2>Change Notes</h2>
+<h3><a href="../../../classes/Eventful.html">Eventful</a> API</h3>
+<h4>Version 2.2.1</h4>
+<ul>
+<li>Updated Paul Knight&#8216;s contact email in the docs (please reach him at
+pknight@eventful.com)
+
+</li>
+</ul>
+<h4>Version 2.2.0</h4>
+<ul>
+<li>The authentication bug has been fixed, so I&#8216;m rolling back the
+workaround.
+
+</li>
+<li>Documented the parameters for specifying alternative API servers when
+calling Eventful.new
+
+</li>
+<li>The names of these keys have been changed to be a bit friendlier. The old
+keys will still work fine.
+
+</li>
+<li>Hash keys to methods can now be Symbols, in addition to strings
+
+</li>
+<li>A fun new example, just because
+
+</li>
+</ul>
+<h4>Version 2.1.1</h4>
+<ul>
+<li>Includes a workaround fix for an authentication bug. This fix may be rolled
+back should the workaround become unecessary in the future.
+
+</li>
+</ul>
+<h4>Version 2.1</h4>
+<ul>
+<li>As EVDB Inc. has been renamed <a
+href="../../../classes/Eventful.html">Eventful</a> Inc., the EVDB module
+has been renamed <a href="../../../classes/Eventful.html">Eventful</a>, and
+the gem is now named eventfulapi. Support for the evdbapi gem is being
+discontinued; please use the eventfulapi gem from now on.
+
+</li>
+<li>Much better at throwing an error when a network or server problem happens,
+rather than failing silently and mysteriously
+
+</li>
+<li>Documentation improvements
+
+</li>
+</ul>
+<h3>EVDB API</h3>
+<h4>Version 2.0.1</h4>
+<ul>
+<li>Fixed a minor documentation error
+
+</li>
+</ul>
+<h4>Version 2.0</h4>
+<p>
+Version 2.0 of this library includes some significant changes which may not
+be backwards compatible. Specifically:
+</p>
+<ul>
+<li>Anonymous logins are now allowed
+
+</li>
+<li>Fixes a potential image uploading API error
+
+</li>
+</ul>
+<p>
+Most importantly, the library now uses YAML as its data exchange format
+instead of XML, and the objects returned from a call can be used like
+hashes instead of REXML objects.
+</p>
+<h2>Information</h2>
+<table>
+<tr><td valign="top">Status:</td><td>Stable
+
+</td></tr>
+<tr><td valign="top">Version:</td><td>2.2.1
+
+</td></tr>
+<tr><td valign="top">Date:</td><td>2007-03-24
+
+</td></tr>
+<tr><td valign="top">Current Author:</td><td>Paul Knight (<a
+href="mailto:pknight@eventful.com">pknight@eventful.com</a>)
+
+</td></tr>
+<tr><td valign="top">Previous Authors:</td><td>Joe Auricchio
+
+</td></tr>
+<tr><td valign="top">Copyright:</td><td>Copyright (C) 2005-2007 <a
+href="../../../classes/Eventful.html">Eventful</a> Inc.
+
+</td></tr>
+<tr><td valign="top">License:</td><td>This code is distributed under the same terms as Ruby itself (see <a
+href="http://www.ruby-lang.org/en/LICENSE.txt">www.ruby-lang.org/en/LICENSE.txt</a>)
+
+</td></tr>
+</table>
+
+    </div>
+
+    <div id="requires-list">
+      <h3 class="section-bar">Required files</h3>
+
+      <div class="name-list">
+      mime/types&nbsp;&nbsp;
+      rubygems&nbsp;&nbsp;
+      mime/types&nbsp;&nbsp;
+      yaml&nbsp;&nbsp;
+      cgi&nbsp;&nbsp;
+      net/http&nbsp;&nbsp;
+      base64&nbsp;&nbsp;
+      digest/md5&nbsp;&nbsp;
+      </div>
+    </div>
+
+   </div>
+
+
+  </div>
+
+
+    <!-- if includes -->
+
+    <div id="section">
+
+
+
+
+
+      
+
+
+    <!-- if method_list -->
+
+
+  </div>
+
+
+<div id="validator-badges">
+  <p><small><a href="http://validator.w3.org/check/referer">[Validate]</a></small></p>
+</div>
+
+</body>
+</html>
